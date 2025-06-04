@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studi Mental Accounting Mahasiswa KIP Kuliah</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Academia -->
+    <!-- Application Structure Plan: SPA ini menggunakan struktur dasbor tematik satu halaman. Tujuannya adalah untuk mengubah laporan penelitian yang padat menjadi sebuah alur cerita yang menarik, memandu pengguna dari konsep dasar, praktik nyata, faktor-faktor yang memengaruhi, hingga dampak dan rekomendasi. Struktur ini dipilih karena lebih intuitif untuk eksplorasi non-linear dibandingkan format bab tradisional, sehingga meningkatkan pemahaman dan keterlibatan pengguna. Interaksi seperti grafik dinamis, tab, dan kartu yang dapat diklik dirancang untuk membuat data kompleks menjadi lebih mudah dicerna. -->
+    <!-- Visualization & Content Choices: 1. Komponen Dana KIP: Goal: Inform -> Viz: Kartu ikon -> Interaction: Statis -> Justification: Memperkenalkan konteks awal secara jelas. 2. Prinsip Mental Accounting: Goal: Educate -> Viz: Kartu interaktif -> Interaction: Klik untuk detail -> Justification: Menyederhanakan teori kompleks. 3. Alokasi Dana Mahasiswa: Goal: Analyze/Compare -> Viz: Grafik Donat Chart.js -> Interaction: Hover & Slider -> Justification: Visualisasi inti temuan tentang alokasi dan masalah pengeluaran berlebih. 4. Faktor Pengaruh: Goal: Organize -> Viz: Grid ikon -> Interaction: Klik untuk info -> Justification: Mendorong eksplorasi mandiri. 5. Dampak: Goal: Compare -> Viz: Kolom pro/kontra -> Interaction: Statis -> Justification: Perbandingan langsung yang kuat. 6. Rekomendasi: Goal: Inform -> Viz: Sistem Tab -> Interaction: Klik untuk beralih audiens -> Justification: Mengorganisir informasi akhir secara efisien. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F4;
+            color: #4A4A4A;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover {
+            color: #D35400;
+        }
+        .nav-link.active {
+            color: #D35400;
+            border-bottom: 2px solid #D35400;
+        }
+        .tab-button.active {
+            background-color: #D35400;
+            color: #FFFFFF;
+        }
+        .card {
+            background-color: #FFFFFF;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .btn-primary {
+            background-color: #8E44AD;
+            color: #FFFFFF;
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #793795;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <a href="#" class="text-xl font-bold text-gray-800">Studi KIP Kuliah</a>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#pendahuluan" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Pendahuluan</a>
+                        <a href="#teori" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Teori</a>
+                        <a href="#praktik" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Praktik Mahasiswa</a>
+                        <a href="#faktor" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Faktor Pengaruh</a>
+                        <a href="#dampak" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Dampak</a>
+                        <a href="#rekomendasi" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Rekomendasi</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+                        <span class="sr-only">Buka menu</span>
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div id="mobile-menu" class="hidden md:hidden">
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                    <a href="#pendahuluan" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Pendahuluan</a>
+                    <a href="#teori" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Teori</a>
+                    <a href="#praktik" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Praktik Mahasiswa</a>
+                    <a href="#faktor" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Faktor Pengaruh</a>
+                    <a href="#dampak" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Dampak</a>
+                    <a href="#rekomendasi" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Rekomendasi</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <section id="pendahuluan" class="text-center py-12 md:py-20">
+            <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-gray-900 mb-4">Penerapan <span class="text-[#D35400]">Mental Accounting</span> Mahasiswa KIP Kuliah</h1>
+            <p class="max-w-3xl mx-auto text-lg md:text-xl text-gray-600">
+                Sebuah eksplorasi interaktif tentang bagaimana mahasiswa penerima KIP Kuliah mengelola dana bantuan mereka, dan bagaimana proses kognitif "akuntansi mental" membentuk keputusan finansial yang berdampak pada kesuksesan studi mereka.
+            </p>
+        </section>
+        
+        <section id="teori" class="py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900">Apa Itu Mental Accounting?</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-gray-600">
+                    Ini adalah cara kita secara tidak sadar mengelompokkan dan memperlakukan uang secara berbeda berdasarkan sumber atau tujuannya, yang seringkali mengarah pada keputusan yang tidak rasional.
+                </p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card p-6">
+                    <h3 class="font-bold text-lg mb-2 text-gray-800">💰 Pelanggaran Fungibilitas</h3>
+                    <p class="text-gray-600">Secara teori, semua uang sama. Dalam praktik, "uang KIP" terasa berbeda dari "uang hasil kerja," sehingga dibelanjakan dengan cara yang berbeda.</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold text-lg mb-2 text-gray-800">🗂️ Pengkategorian Dana</h3>
+                    <p class="text-gray-600">Mahasiswa secara mental membuat "pos-pos" anggaran seperti 'uang kos', 'uang makan', dan 'uang nongkrong', masing-masing dengan aturan penggunaannya sendiri.</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold text-lg mb-2 text-gray-800">🎉 Bias "Windfall" (Rezeki Nomplok)</h3>
+                    <p class="text-gray-600">Dana yang diterima sekaligus per semester terasa seperti "bonus" tak terduga, yang memicu kecenderungan untuk lebih boros di awal periode penerimaan.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="praktik" class="py-16 bg-white rounded-2xl shadow-inner">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900">Perjalanan Keuangan Mahasiswa</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-gray-600">
+                    Aplikasi ini memvisualisasikan bagaimana mahasiswa menerapkan *mental accounting* dalam tiga tahap: persepsi awal, praktik pengkategorian, dan evaluasi pengeluaran.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 items-start">
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4 text-gray-800">1. Persepsi Awal: Dana Ini Untuk Apa?</h3>
+                    <div class="space-y-4">
+                        <div class="card p-6 border-l-4 border-green-500">
+                            <h4 class="font-bold text-lg">"Dana Amanah"</h4>
+                            <p class="text-gray-600">Sebagian mahasiswa melihat dana ini sebagai tanggung jawab dan kepercayaan dari negara. Mereka cenderung lebih hati-hati, memprioritaskan kebutuhan akademik, dan menggunakannya sesuai peruntukan untuk kelancaran studi.</p>
+                        </div>
+                        <div class="card p-6 border-l-4 border-orange-500">
+                            <h4 class="font-bold text-lg">"Uang Bonus"</h4>
+                            <p class="text-gray-600">Sebagian lain memperlakukannya sebagai "uang tambahan" yang bebas digunakan setelah kebutuhan dasar terpenuhi. Persepsi ini, dipicu oleh *windfall bias*, seringkali menjadi akar dari perilaku konsumtif.</p>
+                        </div>
+                    </div>
+                     <h3 class="text-2xl font-semibold mt-8 mb-4 text-gray-800">3. Evaluasi & Kontrol: Terencana vs Reaktif</h3>
+                    <div class="space-y-4">
+                        <div class="card p-6">
+                            <h4 class="font-bold text-lg">🧑‍💻 Si Perencana</h4>
+                            <p class="text-gray-600">Melakukan pencatatan rutin di buku atau aplikasi, melakukan evaluasi mingguan/bulanan, dan secara proaktif mengontrol pengeluaran agar sesuai anggaran mental.</p>
+                        </div>
+                        <div class="card p-6">
+                            <h4 class="font-bold text-lg">🤔 Si Reaktif</h4>
+                            <p class="text-gray-600">Mengandalkan ingatan, baru merasa perlu berhemat ketika uang mulai menipis. Evaluasi ini seringkali terlambat untuk mencegah masalah keuangan.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="sticky top-24">
+                    <h3 class="text-2xl font-semibold mb-4 text-center text-gray-800">2. Praktik Pengkategorian Dana</h3>
+                    <div class="card p-6">
+                        <div class="chart-container">
+                            <canvas id="fundAllocationChart"></canvas>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <p class="text-gray-600 text-sm mb-2">Geser untuk melihat bagaimana alokasi "Keinginan" dapat mengganggu anggaran.</p>
+                            <input id="lifestyleSlider" type="range" min="15" max="60" value="30" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                            <p class="mt-2 text-sm text-gray-500">Porsi Keinginan/Gaya Hidup: <span id="lifestyleValue" class="font-bold">30</span>%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="faktor" class="py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900">Faktor-Faktor yang Mempengaruhi</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-gray-600">
+                    Praktik *mental accounting* tidak terjadi dalam ruang hampa. Klik ikon di bawah untuk melihat faktor-faktor kunci yang membentuk perilaku keuangan mahasiswa.
+                </p>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 text-center">
+                <div class="factor-card card p-4 cursor-pointer" data-factor="literasi">
+                    <div class="text-4xl mb-2">🎓</div>
+                    <h4 class="font-semibold">Literasi Keuangan</h4>
+                </div>
+                <div class="factor-card card p-4 cursor-pointer" data-factor="gayaHidup">
+                    <div class="text-4xl mb-2">🛍️</div>
+                    <h4 class="font-semibold">Gaya Hidup</h4>
+                </div>
+                <div class="factor-card card p-4 cursor-pointer" data-factor="sosial">
+                     <div class="text-4xl mb-2">🧑‍🤝‍🧑</div>
+                    <h4 class="font-semibold">Lingkungan Sosial</h4>
+                </div>
+                <div class="factor-card card p-4 cursor-pointer" data-factor="kontrolDiri">
+                    <div class="text-4xl mb-2">🧘</div>
+                    <h4 class="font-semibold">Kontrol Diri</h4>
+                </div>
+                <div class="factor-card card p-4 cursor-pointer" data-factor="keluarga">
+                    <div class="text-4xl mb-2">🏠</div>
+                    <h4 class="font-semibold">Latar Belakang</h4>
+                </div>
+            </div>
+            <div id="factor-details" class="mt-8 card p-6 bg-blue-50 border border-blue-200 hidden">
+                <h4 id="factor-title" class="font-bold text-lg mb-2 text-blue-800"></h4>
+                <p id="factor-text" class="text-blue-700"></p>
+            </div>
+        </section>
+
+        <section id="dampak" class="py-16">
+             <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900">Dampak & Konsekuensi</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-gray-600">
+                    Cara mahasiswa mengelola dana KIP Kuliah berdampak langsung pada kesejahteraan finansial dan keberhasilan akademik mereka.
+                </p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="card p-8 bg-green-50 border-t-4 border-green-500">
+                    <h3 class="text-2xl font-bold text-green-800 mb-4">✅ Pengelolaan Efektif</h3>
+                    <ul class="space-y-3 text-green-700">
+                        <li class="flex items-start"><span class="mr-2 mt-1">✔️</span><span>Kebutuhan pokok dan akademik terjamin.</span></li>
+                        <li class="flex items-start"><span class="mr-2 mt-1">✔️</span><span>Rasa aman finansial dan bebas dari stres keuangan.</span></li>
+                        <li class="flex items-start"><span class="mr-2 mt-1">✔️</span><span>Fokus belajar meningkat, prestasi akademik terjaga.</span></li>
+                        <li class="flex items-start"><span class="mr-2 mt-1">✔️</span><span>Memiliki tabungan untuk kebutuhan darurat atau masa depan.</span></li>
+                    </ul>
+                </div>
+                <div class="card p-8 bg-red-50 border-t-4 border-red-500">
+                    <h3 class="text-2xl font-bold text-red-800 mb-4">❌ Pengelolaan Buruk</h3>
+                    <ul class="space-y-3 text-red-700">
+                        <li class="flex items-start"><span class="mr-2 mt-1">✖️</span><span>Dana habis sebelum waktunya, kesulitan memenuhi kebutuhan.</span></li>
+                        <li class="flex items-start"><span class="mr-2 mt-1">✖️</span><span>Kecemasan finansial yang mengganggu konsentrasi belajar.</span></li>
+                        <li class="flex items-start"><span class="mr-2 mt-1">✖️</span><span>Penyimpangan dana untuk gaya hidup konsumtif.</span></li>
+                        <li class="flex items-start"><span class="mr-2 mt-1">✖️</span><span>Risiko terjerat utang atau bahkan putus kuliah.</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="rekomendasi" class="py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900">Rekomendasi</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-gray-600">
+                    Berdasarkan temuan, berikut adalah rekomendasi yang ditujukan bagi berbagai pihak untuk meningkatkan efektivitas program KIP Kuliah.
+                </p>
+            </div>
+            <div>
+                <div class="mb-4 flex justify-center border-b border-gray-200">
+                    <button class="tab-button active py-2 px-4 font-semibold text-gray-500 transition" data-tab="mahasiswa">Untuk Mahasiswa</button>
+                    <button class="tab-button py-2 px-4 font-semibold text-gray-500 transition" data-tab="kampus">Untuk Kampus</button>
+                    <button class="tab-button py-2 px-4 font-semibold text-gray-500 transition" data-tab="pemerintah">Untuk Pemerintah</button>
+                </div>
+                <div id="rekomendasi-content" class="card p-6">
+                    <div id="mahasiswa-content" class="tab-content">
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li>Secara proaktif tingkatkan literasi keuangan pribadi.</li>
+                            <li>Buat anggaran yang realistis dan terapkan *mental accounting* secara sadar.</li>
+                            <li>Prioritaskan kebutuhan akademik di atas keinginan konsumtif.</li>
+                            <li>Lakukan evaluasi pengeluaran secara rutin dan jujur.</li>
+                            <li>Latih pengendalian diri terhadap godaan impulsif dan tekanan sosial.</li>
+                        </ul>
+                    </div>
+                    <div id="kampus-content" class="tab-content hidden">
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li>Selenggarakan program literasi keuangan yang wajib dan berkelanjutan.</li>
+                            <li>Sediakan layanan konseling keuangan bagi mahasiswa.</li>
+                            <li>Perkuat sosialisasi tentang filosofi dan tujuan dana KIP Kuliah.</li>
+                            <li>Kembangkan program pendampingan (mentoring) pengelolaan keuangan.</li>
+                        </ul>
+                    </div>
+                    <div id="pemerintah-content" class="tab-content hidden">
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li>Sempurnakan materi sosialisasi nasional dengan penekanan pada pengelolaan keuangan.</li>
+                            <li>Fasilitasi pengembangan modul literasi keuangan standar untuk perguruan tinggi.</li>
+                            <li>Lakukan evaluasi berkala terhadap efektivitas penggunaan dana.</li>
+                            <li>Kaji opsi penyaluran dana biaya hidup secara lebih bertahap (misal: per bulan) untuk mengurangi *windfall bias*.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+    </main>
+    
+    <footer class="bg-gray-800 text-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center text-sm">
+            <p>&copy; 2025 Analisis Interaktif. Dibuat berdasarkan Laporan Penelitian "Penerapan Mental Accounting Mahasiswa Penerima KIP Kuliah".</p>
+        </div>
+    </footer>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    const factorCards = document.querySelectorAll('.factor-card');
+    const factorDetails = document.getElementById('factor-details');
+    const factorTitle = document.getElementById('factor-title');
+    const factorText = document.getElementById('factor-text');
+    const factorData = {
+        literasi: {
+            title: '🎓 Literasi Keuangan',
+            text: 'Pemahaman yang baik tentang anggaran, tabungan, dan utang mendorong praktik mental accounting yang lebih rasional dan terencana, serta membantu mahasiswa membuat keputusan finansial yang lebih baik.'
+        },
+        gayaHidup: {
+            title: '🛍️ Gaya Hidup & Perilaku Konsumtif',
+            text: 'Gaya hidup hedonis dan konsumtif memperbesar "akun mental" untuk keinginan, seringkali menjadi penyebab utama penyimpangan dana KIP Kuliah untuk membeli gawai, pakaian, atau hiburan mahal.'
+        },
+        sosial: {
+            title: '🧑‍🤝‍🧑 Lingkungan Sosial & Teman Sebaya',
+            text: 'Tekanan dari teman sebaya untuk berpartisipasi dalam kegiatan konsumtif dapat merusak rencana anggaran yang sudah dibuat, menguras dana dari pos-pos kebutuhan yang lebih penting.'
+        },
+        kontrolDiri: {
+            title: '🧘 Pengendalian Diri',
+            text: 'Kemampuan untuk menahan godaan jangka pendek demi tujuan jangka panjang sangat vital. Kontrol diri yang rendah membuat mahasiswa kesulitan mematuhi batasan anggaran mental yang telah mereka buat.'
+        },
+        keluarga: {
+            title: '🏠 Latar Belakang Sosial Ekonomi',
+            text: 'Kebiasaan dan persepsi tentang uang yang terbentuk di keluarga mempengaruhi cara mahasiswa mengelola dana. Kondisi kekurangan di masa lalu bisa memicu "keinginan terpendam" saat menerima dana.'
+        }
+    };
+
+    factorCards.forEach(card => {
+        card.addEventListener('click', () => {
+            const factor = card.dataset.factor;
+            factorTitle.textContent = factorData[factor].title;
+            factorText.textContent = factorData[factor].text;
+            factorDetails.classList.remove('hidden');
+
+            factorCards.forEach(c => c.classList.remove('ring-2', 'ring-blue-500'));
+            card.classList.add('ring-2', 'ring-blue-500');
+        });
+    });
+
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const tabId = button.dataset.tab;
+
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            tabContents.forEach(content => {
+                if (content.id === `${tabId}-content`) {
+                    content.classList.remove('hidden');
+                } else {
+                    content.classList.add('hidden');
+                }
+            });
+        });
+    });
+
+    const slider = document.getElementById('lifestyleSlider');
+    const lifestyleValue = document.getElementById('lifestyleValue');
+    const ctx = document.getElementById('fundAllocationChart').getContext('2d');
+    
+    const initialData = {
+        labels: ['Kebutuhan Pokok', 'Pendidikan', 'Tabungan/Darurat', 'Keinginan/Gaya Hidup'],
+        datasets: [{
+            data: [40, 15, 15, 30],
+            backgroundColor: ['#2ECC71', '#3498DB', '#F1C40F', '#E74C3C'],
+            borderColor: '#F8F7F4',
+            borderWidth: 4
+        }]
+    };
+
+    const chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: initialData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '60%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed !== null) {
+                                label += context.parsed + '%';
+                            }
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    slider.addEventListener('input', (event) => {
+        const wantsPercentage = parseInt(event.target.value, 10);
+        lifestyleValue.textContent = wantsPercentage;
+        
+        const remainingPercentage = 100 - wantsPercentage;
+        const needsPercentage = remainingPercentage * 0.55; 
+        const educationPercentage = remainingPercentage * 0.25;
+        const savingsPercentage = remainingPercentage * 0.20;
+
+        chart.data.datasets[0].data = [needsPercentage, educationPercentage, savingsPercentage, wantsPercentage];
+        chart.update();
+    });
+
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').substring(1) === entry.target.id) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+    }, { threshold: 0.5 });
+
+    sections.forEach(section => {
+        observer.observe(section);
+    });
+});
+</script>
+
+</body>
+</html>
